@@ -9,12 +9,10 @@ app = Flask(__name__)
 
 usuarios = {}
 
-# rota base (só pra testar se tá online)
 @app.route("/", methods=["GET"])
 def home():
-    return "Bot online"
+    return "Bot RH online"
 
-# webhook do telegram
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
     json_str = request.get_data().decode("UTF-8")
@@ -22,58 +20,80 @@ def webhook():
     bot.process_new_updates([update])
     return "OK", 200
 
-# lógica do chatbot
+# COMANDO /start
+@bot.message_handler(commands=["start"])
+def start(message):
+    user = message.from_user.id
+
+    usuarios[user] = {
+        "etapa": 1,
+        "respostas": []
+    }
+
+    bot.reply_to(message,
+        "👋 Olá!\n\n"
+        "Este é um espaço *100% anônimo* para você compartilhar sua percepção sobre a liderança.\n\n"
+        "Sinta-se à vontade para responder com sinceridade.\n\n"
+        "👉 No geral, como você avalia o suporte e a clareza que recebe da sua gestão direta hoje?",
+        parse_mode="Markdown"
+    )
+
+# FLUXO PRINCIPAL
 @bot.message_handler(func=lambda message: True)
 def responder(message):
-    user = message.from_user.username or "anon"
+    user = message.from_user.id
     texto = message.text
 
-    # PRIMEIRA INTERAÇÃO
     if user not in usuarios:
-        usuarios[user] = {"etapa": 1, "respostas": []}
-        bot.reply_to(message,
-            "Olá! Sou um consultor de RH e estou aqui para te ouvir.\n\n"
-            "👉 No geral, como você avalia o suporte e a clareza que recebe da sua gestão direta hoje?"
-        )
+        bot.reply_to(message, "Digite /start para iniciar 🙂")
         return
 
     etapa = usuarios[user]["etapa"]
-    usuarios[user]["respostas"].append(texto)
 
-    # PERGUNTA 2
+    # ETAPA 1
     if etapa == 1:
+        usuarios[user]["respostas"].append(texto)
         usuarios[user]["etapa"] = 2
+
         bot.reply_to(message,
-            "Entendo. 👉 O que você considera que a gestão faz muito bem e deve continuar fazendo?"
+            "Entendo 👍\n\n"
+            "👉 O que você considera que a gestão faz muito bem e deve continuar fazendo?"
         )
 
-    # PERGUNTA 3
+    # ETAPA 2
     elif etapa == 2:
+        usuarios[user]["respostas"].append(texto)
         usuarios[user]["etapa"] = 3
+
         bot.reply_to(message,
-            "Obrigado por compartilhar. 👉 Qual é o principal ponto de melhoria, algo que a liderança precisa mudar ou dar mais atenção?"
+            "Obrigado por compartilhar.\n\n"
+            "👉 Qual é o principal ponto de melhoria, algo que a liderança precisa mudar ou dar mais atenção?"
         )
 
     # FINAL
     elif etapa == 3:
+        usuarios[user]["respostas"].append(texto)
         r1, r2, r3 = usuarios[user]["respostas"]
 
         resumo = f"""
-RESUMO DO FEEDBACK:
+📊 *RESUMO DO FEEDBACK*
 
-O colaborador avalia que o suporte e a clareza da gestão {r1.lower()}.
+O colaborador avalia que o suporte e a clareza da gestão:  
+👉 {r1}
 
-Em relação aos pontos positivos, destaca que a gestão {r2.lower()}.
+Pontos positivos destacados:  
+👉 {r2}
 
-Como principal ponto de melhoria, aponta que a liderança precisa {r3.lower()}.
+Principais oportunidades de melhoria:  
+👉 {r3}
 """
 
         bot.reply_to(message,
-            "Obrigado por compartilhar sua visão. A entrevista foi concluída.\n\n"
+            "✅ Entrevista concluída!\n\n"
             f"{resumo}\n\n"
-            "Pronto! Para que o RH receba sua opinião de forma 100% anônima, "
-            "por favor, copie o resumo acima e cole neste link:\n"
-            "https://forms.gle/SEU_LINK_AQUI"
+            "📌 Para enviar sua resposta de forma totalmente anônima, copie o resumo acima e cole neste formulário:\n"
+            "https://forms.gle/fD7apMXa5rNFhRNK9",
+            parse_mode="Markdown"
         )
 
         del usuarios[user]
