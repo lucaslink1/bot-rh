@@ -91,7 +91,7 @@ Principais oportunidades de melhoria:
         bot.reply_to(message,
             "✅ Entrevista concluída!\n\n"
             f"{resumo}\n\n"
-            "📌 Para enviar sua resposta de forma totalmente anônima, copie o resumo acima e cole neste formulário:\n"
+            "📌 Para enviar tire um print da sua entrevista e anexe a imagem aqui. Após fornecer seu feedback sobre a gestão, responda a esta pesquisa.\n"
             "https://forms.gle/fD7apMXa5rNFhRNK9",
             parse_mode="Markdown"
         )
