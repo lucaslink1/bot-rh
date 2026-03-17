@@ -65,7 +65,7 @@ async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "Obrigado! A entrevista foi concluída.\n\n"
             f"{resumo}\n\n"
-            "Pronto! Para que o RH receba sua opinião de forma 100% anônima, por favor, copie o resumo acima e cole neste link: [COLE AQUI O SEU LINK DO GOOGLE FORMS DO PASSO 1]"
+            "Pronto! Para que o RH receba sua opinião de forma 100% anônima, por favor, copie o resumo acima e cole neste link: https://forms.gle/fD7apMXa5rNFhRNK9"
         )
 
         del usuarios[user]
